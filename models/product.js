@@ -1,6 +1,5 @@
 
 const mongoose = require('mongoose');
-const { STRING } = require('sequelize');
 
 const Schema = mongoose.Schema;
 
@@ -20,6 +19,11 @@ const productSchema = new Schema({
   imageUrl:{
     type:String,
     require:true
+  },
+  userId:{
+    type:Schema.Types.Object,
+    ref: 'User',
+    require: true
   }
 })
 
