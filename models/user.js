@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema =mongoose.Schema;
 
-const userSchema = {
+const userSchema = new Schema({
     name: {
         type: String,
         require:true,
@@ -12,12 +12,46 @@ const userSchema = {
         require: true,
     },
     cart: {
-        item: {
+        item: [
+            {
             productId: {type: Schema.Types.ObjectId,ref:'Product', require:true},
             quantity: {type: Number, require: true}
-        }
+            }
+        ]
     }
+})
+
+userSchema.methods.addToCart = function(product){
+    const cartProductIndex = this.cart.item.findIndex((cp)=>{
+              return cp.productId.toString() === product._id.toString();
+           })
+           let newQuantity = 1;
+           const updatedCartItem = [...this.cart.item]
+        
+           if(cartProductIndex>=0){
+            newQuantity = this.cart.item[cartProductIndex].quantity+1;
+            updatedCartItem[cartProductIndex].quantity = newQuantity
+           }else{
+            updatedCartItem.push({
+              productId: product._id,
+              quantity: newQuantity
+            })
+           }
+           const updatedCart = {
+            item: updatedCartItem
+          }
+           this.cart = updatedCart;
+           return this.save();
 }
+
+userSchema.methods.removeFromCart = function(productId){
+    const updatedCartItem = this.cart.item.filter((item)=>{
+              return item.productId.toString() !== productId.toString();
+            })
+            this.cart.item = updatedCartItem;
+            return this.save();
+}
+
 
 module.exports = mongoose.model('User', userSchema);
 
